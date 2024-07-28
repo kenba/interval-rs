@@ -156,9 +156,10 @@ impl<
             + Sub<Output = T>,
     > Interval<T>
 {
+    #[allow(clippy::missing_panics_doc)]
     #[must_use]
     pub fn mean(&self) -> T {
-        let two: T = num_traits::cast(2).unwrap();
+        let two: T = num_traits::cast(2).expect("Could not convert 2 to T");
         self.lower + self.width() / two
     }
 }
