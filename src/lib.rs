@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Ken Barker
+// Copyright (c) 2024-2025 Ken Barker
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"),
@@ -20,6 +20,8 @@
 
 //! # generic-interval
 //!
+//! [![crates.io](https://img.shields.io/crates/v/generic-interval.svg)](https://crates.io/crates/generic-interval)
+//! [![docs.io](https://docs.rs/generic-interval/badge.svg)](https://docs.rs/generic-interval/)
 //! [![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/license/mit/)
 //! [![Rust](https://github.com/kenba/interval-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/kenba/interval-rs/actions)
 //! [![codecov](https://codecov.io/gh/kenba/interval-rs/graph/badge.svg?token=O271HGMYY5)](https://codecov.io/gh/kenba/interval-rs)
@@ -133,8 +135,8 @@ impl<T: Copy + PartialOrd> Interval<T> {
     }
 
     #[must_use]
-    pub fn is_valid(&self) -> bool {
-        self.upper.ge(&self.lower)
+    pub fn is_empty(&self) -> bool {
+        self.upper.lt(&self.lower)
     }
 }
 
@@ -175,11 +177,33 @@ impl<T: Copy + PartialOrd> TryFrom<(T, T)> for Interval<T> {
             lower: params.0,
             upper: params.1,
         };
-        if v.is_valid() {
-            Ok(v)
-        } else {
+        if v.is_empty() {
             Err("Invalid interval")
+        } else {
+            Ok(v)
         }
+    }
+}
+
+impl<T: Copy + Add<Output = T>> Add for Interval<T> {
+    type Output = Self;
+
+    #[must_use]
+    fn add(self, other: Self) -> Self {
+        let lower = self.lower + other.lower;
+        let upper = self.upper + other.upper;
+        Self { lower, upper }
+    }
+}
+
+impl<T: Copy + Sub<Output = T>> Sub for Interval<T> {
+    type Output = Self;
+
+    #[must_use]
+    fn sub(self, other: Self) -> Self {
+        let lower = self.lower - other.lower;
+        let upper = self.upper - other.upper;
+        Self { lower, upper }
     }
 }
 
@@ -212,10 +236,10 @@ pub fn intersection<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Opt
         lower: max(a.lower(), b.lower()),
         upper: min(a.upper(), b.upper()),
     };
-    if v.is_valid() {
-        Some(v)
-    } else {
+    if v.is_empty() {
         None
+    } else {
+        Some(v)
     }
 }
 
@@ -272,7 +296,7 @@ mod tests {
 
         assert_eq!(1.0, interval.lower());
         assert_eq!(4.0, interval.upper());
-        assert!(interval.is_valid());
+        assert!(!interval.is_empty());
         println!("interval: {:?}", interval);
 
         assert_eq!(3.0, interval.width());
@@ -284,6 +308,16 @@ mod tests {
         assert_eq!(interval, deserialized);
 
         let interval2 = Interval::new(5.0, 9.0);
+        let result = interval + interval2;
+        assert_eq!(6.0, result.lower());
+        assert_eq!(13.0, result.upper());
+        assert!(!result.is_empty());
+
+        let result = interval - interval2;
+        assert_eq!(-4.0, result.lower());
+        assert_eq!(-5.0, result.upper());
+        assert!(result.is_empty());
+
         let result = intersection(interval, interval2);
         assert!(result.is_none());
 
@@ -297,6 +331,6 @@ mod tests {
         let result = hull(interval, interval2);
         assert_eq!(1.0, result.lower());
         assert_eq!(9.0, result.upper());
-        assert!(result.is_valid());
+        assert!(!result.is_empty());
     }
 }

@@ -3,10 +3,11 @@ name = "generic-interval"
 version = "0.1.0"
 authors = ["Ken Barker <ken.barker@via-technology.aero>"]
 description = "A generic closed interval library."
+documentation = "https://docs.rs/generic-interval/"
 homepage = "https://github.com/kenba/interval-rs"
 repository = "https://github.com/kenba/interval-rs"
 readme = "README.md"
-keywords = ["generic", "interval"]
+keywords = ["interval", "interval-set"]
 categories = ["mathematics", "no-std"]
 license = "MIT"
 edition = "2021"
@@ -23,6 +24,6 @@ unsafe_code = "forbid"
 
 [lints.clippy]
 enum_glob_use = "deny"
-nursery = { level = "deny", priority = -1 }
-pedantic = { level = "deny", priority = -1 }
+nursery = "deny"
+pedantic = "deny"
 unwrap_used = "deny"

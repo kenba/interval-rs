@@ -1,5 +1,7 @@
 # generic-interval
 
+[![crates.io](https://img.shields.io/crates/v/generic-interval.svg)](https://crates.io/crates/generic-interval)
+[![docs.io](https://docs.rs/generic-interval/badge.svg)](https://docs.rs/generic-interval/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/license/mit/)
 [![Rust](https://github.com/kenba/interval-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/kenba/interval-rs/actions)
 [![codecov](https://codecov.io/gh/kenba/interval-rs/graph/badge.svg?token=O271HGMYY5)](https://codecov.io/gh/kenba/interval-rs)
