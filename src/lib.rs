@@ -73,7 +73,7 @@
 
 #![cfg_attr(not(test), no_std)]
 
-use core::ops::{Add, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
 use num_traits::{Num, NumCast};
 use serde::{Deserialize, Serialize};
 
@@ -147,6 +147,16 @@ impl<T: Copy + PartialOrd + Sub<Output = T>> Interval<T> {
     }
 }
 
+impl<T: Default> Default for Interval<T> {
+    #[must_use]
+    fn default() -> Self {
+        Self {
+            lower: T::default(),
+            upper: T::default(),
+        }
+    }
+}
+
 impl<
         T: Num
             + NumCast
@@ -185,25 +195,39 @@ impl<T: Copy + PartialOrd> TryFrom<(T, T)> for Interval<T> {
     }
 }
 
-impl<T: Copy + Add<Output = T>> Add for Interval<T> {
+impl<T: Add<Output = T>> Add for Interval<T> {
     type Output = Self;
 
     #[must_use]
-    fn add(self, other: Self) -> Self {
-        let lower = self.lower + other.lower;
-        let upper = self.upper + other.upper;
-        Self { lower, upper }
+    fn add(self, other: Self) -> Self::Output {
+        Self {
+            lower: self.lower + other.lower,
+            upper: self.upper + other.upper,
+        }
     }
 }
 
-impl<T: Copy + Sub<Output = T>> Sub for Interval<T> {
+impl<T: Copy + Add<Output = T>> AddAssign for Interval<T> {
+    fn add_assign(&mut self, other: Self) {
+        *self = *self + other;
+    }
+}
+
+impl<T: Sub<Output = T>> Sub for Interval<T> {
     type Output = Self;
 
     #[must_use]
-    fn sub(self, other: Self) -> Self {
-        let lower = self.lower - other.lower;
-        let upper = self.upper - other.upper;
-        Self { lower, upper }
+    fn sub(self, other: Self) -> Self::Output {
+        Self {
+            lower: self.lower - other.lower,
+            upper: self.upper - other.upper,
+        }
+    }
+}
+
+impl<T: Copy + Sub<Output = T>> SubAssign for Interval<T> {
+    fn sub_assign(&mut self, other: Self) {
+        *self = *self - other;
     }
 }
 
@@ -292,6 +316,11 @@ mod tests {
         let bad_interval = Interval::try_from((4.0, 3.0));
         assert_eq!(Err("Invalid interval"), bad_interval);
 
+        let zero = Interval::<f64>::default();
+        assert_eq!(0.0, zero.lower());
+        assert_eq!(0.0, zero.upper());
+        assert!(!zero.is_empty());
+
         let interval = Interval::try_from((1.0, 4.0)).unwrap();
 
         assert_eq!(1.0, interval.lower());
@@ -313,7 +342,19 @@ mod tests {
         assert_eq!(13.0, result.upper());
         assert!(!result.is_empty());
 
+        let mut result = interval;
+        result += interval2;
+        assert_eq!(6.0, result.lower());
+        assert_eq!(13.0, result.upper());
+        assert!(!result.is_empty());
+
         let result = interval - interval2;
+        assert_eq!(-4.0, result.lower());
+        assert_eq!(-5.0, result.upper());
+        assert!(result.is_empty());
+
+        let mut result = interval;
+        result -= interval2;
         assert_eq!(-4.0, result.lower());
         assert_eq!(-5.0, result.upper());
         assert!(result.is_empty());
