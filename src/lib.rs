@@ -299,6 +299,7 @@ pub fn hull<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Interval<T>
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::DateTime;
     use serde_json;
 
     #[test]
@@ -373,5 +374,42 @@ mod tests {
         assert_eq!(1.0, result.lower());
         assert_eq!(9.0, result.upper());
         assert!(!result.is_empty());
+    }
+
+    #[test]
+    fn test_interval_date_time() {
+        let start_time = DateTime::from_timestamp(1431648000, 0).expect("invalid timestamp");
+        let finish_time = DateTime::from_timestamp(1431649000, 0).expect("invalid timestamp");
+        let bad_interval = Interval::try_from((finish_time, start_time));
+        assert_eq!(Err("Invalid interval"), bad_interval);
+
+        let interval = Interval::try_from((start_time, finish_time)).unwrap();
+
+        assert_eq!(start_time, interval.lower());
+        assert_eq!(finish_time, interval.upper());
+        assert!(!interval.is_empty());
+        println!("interval: {:?}", interval);
+
+        let start_time2 = DateTime::from_timestamp(1431649500, 0).expect("invalid timestamp");
+        let finish_time2: DateTime<chrono::Utc> =
+            DateTime::from_timestamp(1431650000, 0).expect("invalid timestamp");
+        let interval2 = Interval::new(start_time2, finish_time2);
+        assert!(!interval2.is_empty());
+
+        let result = intersection(interval, interval2);
+        assert!(result.is_none());
+
+        let overall = hull(interval, interval2);
+        assert_eq!(start_time, overall.lower());
+        assert_eq!(finish_time2, overall.upper());
+
+        let start_time3 = DateTime::from_timestamp(1431648500, 0).expect("invalid timestamp");
+        let finish_time3: DateTime<chrono::Utc> =
+            DateTime::from_timestamp(1431651000, 0).expect("invalid timestamp");
+        let interval3 = Interval::new(start_time3, finish_time3);
+        assert!(!interval3.is_empty());
+
+        let result = intersection(interval, interval3);
+        assert!(result.is_some());
     }
 }
