@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["interval", "interval-set"]
 categories = ["mathematics", "no-std"]
 license = "MIT"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 num-traits = {version = "0.2", default-features = false }
