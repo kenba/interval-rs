@@ -28,8 +28,8 @@
 //!
 //! A generic closed interval library.
 //!
-//! An interval is a pair of numbers which represents all the numbers between them.  
-//! Intervals are considered closed so the bounds are included.  
+//! An interval is a pair of numbers which represents all the numbers between them.
+//! Intervals are considered closed so the bounds are included.
 //! Intervals are written [a, b] to represent all the numbers between a and b
 //! inclusive, a ≤ b.
 //!
@@ -87,11 +87,7 @@ pub fn min<T>(a: T, b: T) -> T
 where
     T: Copy + PartialOrd,
 {
-    if b < a {
-        b
-    } else {
-        a
-    }
+    if b < a { b } else { a }
 }
 
 /// Return the maximum of two values.
@@ -104,11 +100,7 @@ pub fn max<T>(a: T, b: T) -> T
 where
     T: Copy + PartialOrd,
 {
-    if b < a {
-        a
-    } else {
-        b
-    }
+    if b < a { a } else { b }
 }
 
 /// A closed interval (endpoints included).
@@ -148,7 +140,6 @@ impl<T: Copy + PartialOrd + Sub<Output = T>> Interval<T> {
 }
 
 impl<T: Default> Default for Interval<T> {
-    #[must_use]
     fn default() -> Self {
         Self {
             lower: T::default(),
@@ -158,15 +149,15 @@ impl<T: Default> Default for Interval<T> {
 }
 
 impl<
-        T: Num
-            + NumCast
-            + Copy
-            + PartialOrd
-            + Add<Output = T>
-            + Div<Output = T>
-            + Mul<Output = T>
-            + Sub<Output = T>,
-    > Interval<T>
+    T: Num
+        + NumCast
+        + Copy
+        + PartialOrd
+        + Add<Output = T>
+        + Div<Output = T>
+        + Mul<Output = T>
+        + Sub<Output = T>,
+> Interval<T>
 {
     #[allow(clippy::missing_panics_doc)]
     #[must_use]
@@ -198,7 +189,6 @@ impl<T: Copy + PartialOrd> TryFrom<(T, T)> for Interval<T> {
 impl<T: Add<Output = T>> Add for Interval<T> {
     type Output = Self;
 
-    #[must_use]
     fn add(self, other: Self) -> Self::Output {
         Self {
             lower: self.lower + other.lower,
@@ -216,7 +206,6 @@ impl<T: Copy + Add<Output = T>> AddAssign for Interval<T> {
 impl<T: Sub<Output = T>> Sub for Interval<T> {
     type Output = Self;
 
-    #[must_use]
     fn sub(self, other: Self) -> Self::Output {
         Self {
             lower: self.lower - other.lower,
@@ -260,14 +249,10 @@ pub fn intersection<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Opt
         lower: max(a.lower(), b.lower()),
         upper: min(a.upper(), b.upper()),
     };
-    if v.is_empty() {
-        None
-    } else {
-        Some(v)
-    }
+    if v.is_empty() { None } else { Some(v) }
 }
 
-/// Calculate the union of the two `Interval`s.  
+/// Calculate the union of the two `Interval`s.
 /// Note: it is called `hull` because it does not match the precise definition
 /// of a `union` of sets.
 ///
