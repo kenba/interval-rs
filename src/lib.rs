@@ -130,6 +130,26 @@ impl<T: Copy + PartialOrd> Interval<T> {
     pub fn is_empty(&self) -> bool {
         self.upper.lt(&self.lower)
     }
+
+    /// Return whether the value is inside the `Interval` inclusively.
+    ///
+    /// * `value` the value.
+    ///
+    /// returns true if lower <= value <= upper.
+    #[must_use]
+    pub fn is_inside(&self, value: &T) -> bool {
+        self.lower.le(value) && self.upper.ge(value)
+    }
+
+    /// Return whether the value is inside the `Interval`.
+    ///
+    /// * `value` the value.
+    ///
+    /// returns true if lower <= value < upper.
+    #[must_use]
+    pub fn is_within(&self, value: &T) -> bool {
+        self.lower.le(value) && self.upper.gt(value)
+    }
 }
 
 impl<T: Copy + PartialOrd + Sub<Output = T>> Interval<T> {
@@ -220,6 +240,37 @@ impl<T: Copy + Sub<Output = T>> SubAssign for Interval<T> {
     }
 }
 
+/// Calculate the overlap of the two `Interval`s.
+///
+/// * `a`, `b` the `Interval`s.
+///
+/// returns the overlap, or None if the overlap is not valid.
+///
+/// # Examples
+/// ```
+/// use generic_interval::{Interval, overlap};
+///
+/// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+/// pub struct Metres(pub f64);
+///
+/// let a = Interval::try_from((Metres(1.0), Metres(4.0))).unwrap();
+/// let b = Interval::try_from((Metres(6.0), Metres(9.0))).unwrap();
+///
+/// let result = overlap(a, b);
+/// assert!(result.is_empty());
+///
+/// let c = Interval::try_from((Metres(4.0), Metres(9.0))).unwrap();
+/// let result = overlap(a, c);
+/// assert_eq!(Metres(4.0), result.lower());
+/// assert_eq!(Metres(4.0), result.upper());
+/// ```
+pub fn overlap<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Interval<T> {
+    Interval {
+        lower: max(a.lower(), b.lower()),
+        upper: min(a.upper(), b.upper()),
+    }
+}
+
 /// Calculate the intersection of the two `Interval`s.
 ///
 /// * `a`, `b` the `Interval`s.
@@ -245,10 +296,7 @@ impl<T: Copy + Sub<Output = T>> SubAssign for Interval<T> {
 /// assert_eq!(Metres(4.0), result.upper());
 /// ```
 pub fn intersection<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Option<Interval<T>> {
-    let v = Interval {
-        lower: max(a.lower(), b.lower()),
-        upper: min(a.upper(), b.upper()),
-    };
+    let v = overlap(a, b);
     if v.is_empty() { None } else { Some(v) }
 }
 
@@ -316,6 +364,15 @@ mod tests {
 
         assert_eq!(3.0, interval.width());
         assert_eq!(2.5, interval.mean());
+
+        assert!(!interval.is_inside(&0.9));
+        assert!(interval.is_inside(&1.0));
+        assert!(interval.is_inside(&4.0));
+        assert!(!interval.is_inside(&4.1));
+
+        assert!(!interval.is_within(&0.9));
+        assert!(interval.is_within(&1.0));
+        assert!(!interval.is_within(&4.0));
 
         let serialized = serde_json::to_string(&interval).unwrap();
         println!("serialized interval: {:?}", serialized);
