@@ -252,7 +252,7 @@ impl<T: Copy + Sub<Output = T>> SubAssign for Interval<T> {
 ///
 /// * `a`, `b` the `Interval`s.
 ///
-/// returns the overlap, or None if the overlap is not valid.
+/// returns the overlap, i.e. the max lower and min upper.
 ///
 /// # Examples
 /// ```
@@ -277,6 +277,35 @@ pub fn overlap<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Interval
         lower: max(a.lower(), b.lower()),
         upper: min(a.upper(), b.upper()),
     }
+}
+
+/// Calculate the if and where two `Interval`s overlap..
+///
+/// * `a`, `b` the `Interval`s.
+///
+/// returns the overlap, i.e. or None if the overlap is not valid.
+///
+/// # Examples
+/// ```
+/// use generic_interval::{Interval, overlaps};
+///
+/// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+/// pub struct Metres(pub f64);
+///
+/// let a = Interval::try_from((Metres(1.0), Metres(4.0))).unwrap();
+/// let b = Interval::try_from((Metres(6.0), Metres(9.0))).unwrap();
+///
+/// let result = overlaps(a, b);
+/// assert!(result.is_none());
+///
+/// let c = Interval::try_from((Metres(4.0), Metres(9.0))).unwrap();
+/// let result = overlaps(a, c).unwrap();
+/// assert_eq!(Metres(4.0), result.lower());
+/// assert_eq!(Metres(4.0), result.upper());
+/// ```
+pub fn overlaps<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Option<Interval<T>> {
+    let v = overlap(a, b);
+    if v.is_empty() { None } else { Some(v) }
 }
 
 /// Calculate the intersection of the two `Interval`s.
@@ -304,8 +333,7 @@ pub fn overlap<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Interval
 /// assert_eq!(Metres(4.0), result.upper());
 /// ```
 pub fn intersection<T: Copy + PartialOrd>(a: Interval<T>, b: Interval<T>) -> Option<Interval<T>> {
-    let v = overlap(a, b);
-    if v.is_empty() { None } else { Some(v) }
+    overlaps(a, b)
 }
 
 /// Calculate the union of the two `Interval`s.
