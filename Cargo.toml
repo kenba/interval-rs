@@ -1,6 +1,6 @@
 [package]
 name = "generic-interval"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Ken Barker <ken.barker@via-technology.aero>"]
 description = "A generic closed interval library."
 documentation = "https://docs.rs/generic-interval/"
