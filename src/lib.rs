@@ -121,9 +121,17 @@ impl<T: Copy + PartialOrd> Interval<T> {
         self.lower
     }
 
+    pub const fn set_lower(&mut self, lower: T) {
+        self.lower = lower;
+    }
+
     #[must_use]
     pub const fn upper(&self) -> T {
         self.upper
+    }
+
+    pub const fn set_upper(&mut self, upper: T) {
+        self.upper = upper;
     }
 
     #[must_use]
@@ -400,7 +408,12 @@ mod tests {
         result -= interval2;
         assert_eq!(-4.0, result.lower());
         assert_eq!(-5.0, result.upper());
+
         assert!(result.is_empty());
+        result.set_lower(1.0);
+        assert_eq!(1.0, result.lower());
+        result.set_upper(2.0);
+        assert_eq!(2.0, result.upper());
 
         let result = intersection(interval, interval2);
         assert!(result.is_none());
