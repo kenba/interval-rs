@@ -23,7 +23,7 @@ so it can be used in embedded applications.
 ## Examples
 
 ```rust
-use generic_interval::{Interval, hull, intersection};
+use generic_interval::{Interval, hull, intersection, overlap, overlaps};
 
 // An example new-type based on f64
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
@@ -32,13 +32,19 @@ pub struct Metres(pub f64);
 let a = Interval::try_from((Metres(1.0), Metres(4.0))).unwrap();
 let b = Interval::try_from((Metres(6.0), Metres(9.0))).unwrap();
 
-// Note: the hull does not include 4.0-6.0
+// Note: the hull includes 4.0-6.0
 let result = hull(a, b);
 assert_eq!(Metres(1.0), result.lower());
 assert_eq!(Metres(9.0), result.upper());
 
+// Note: overlap may return an empty interval
+// while overlaps is the same as intersection
 let result = intersection(a, b);
 assert!(result.is_none());
+let result = overlaps(a, b);
+assert!(result.is_none());
+let result = overlap(a, b);
+assert!(result.is_empty());
 
 let c = Interval::try_from((Metres(4.0), Metres(9.0))).unwrap();
 let result = intersection(a, c).unwrap();

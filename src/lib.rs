@@ -28,8 +28,8 @@
 //!
 //! A generic closed interval library.
 //!
-//! An interval is a pair of numbers which represents all the numbers between them.
-//! Intervals are considered closed so the bounds are included.
+//! An interval is a pair of numbers which represents all the numbers between them.\
+//! Intervals are considered closed so the bounds are included.\
 //! Intervals are written [a, b] to represent all the numbers between a and b
 //! inclusive, a ≤ b.
 //!
@@ -44,7 +44,7 @@
 //! ## Examples
 //!
 //! ```
-//! use generic_interval::{Interval, hull, intersection};
+//! use generic_interval::{Interval, hull, intersection, overlap, overlaps};
 //!
 //! // An example new-type based on f64
 //! #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
@@ -53,13 +53,19 @@
 //! let a = Interval::try_from((Metres(1.0), Metres(4.0))).unwrap();
 //! let b = Interval::try_from((Metres(6.0), Metres(9.0))).unwrap();
 //!
-//! // Note: the hull does not include 4.0-6.0
+//! // Note: the hull includes 4.0-6.0
 //! let result = hull(a, b);
 //! assert_eq!(Metres(1.0), result.lower());
 //! assert_eq!(Metres(9.0), result.upper());
 //!
+//! // Note: overlap may return an empty interval
+//! // while overlaps is the same as intersection
 //! let result = intersection(a, b);
 //! assert!(result.is_none());
+//! let result = overlaps(a, b);
+//! assert!(result.is_none());
+//! let result = overlap(a, b);
+//! assert!(result.is_empty());
 //!
 //! let c = Interval::try_from((Metres(4.0), Metres(9.0))).unwrap();
 //! let result = intersection(a, c).unwrap();
@@ -69,7 +75,7 @@
 //!
 //! ## License
 //!
-//! `generic-interval` is provided under a MIT license, see [LICENSE](LICENSE).
+//! `generic-interval` is provided under a MIT license, see [LICENSE](../LICENSE).
 
 #![cfg_attr(not(test), no_std)]
 
