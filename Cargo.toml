@@ -4,7 +4,6 @@ version = "1.0.2"
 authors = ["Ken Barker <ken.barker@via-technology.aero>"]
 description = "A generic closed interval library."
 documentation = "https://docs.rs/generic-interval/"
-homepage = "https://github.com/kenba/interval-rs"
 repository = "https://github.com/kenba/interval-rs"
 readme = "README.md"
 keywords = ["interval", "interval-set"]
